@@ -1,32 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-天气图像分类二阶段官方数据微调脚本（Stage-2 Official Fine-tune）
 
-使用场景：
-- 第一阶段：official_train + extra_train 混合训练，每类平衡到约 3000。
-- 第二阶段：加载第一阶段 best_ema_model_*.pth，只用 official_train 小学习率微调。
-- 验证集：始终只用 official_val，不参与训练、不参与微调。
-
-核心原则：
-1. init_checkpoint：第一阶段 best_ema_model_*.pth，只作为二阶段初始化。
-2. resume_checkpoint：二阶段中断后继续训练用的 raw resume checkpoint。
-3. official_val 从头到尾只用于验证和选模型，绝对不要放进 train_dir。
-
-输出保持和第一阶段一致：
-- best_ema_model_*.pth：用于推理 / 提交 / 下一阶段初始化。
-- best_resume_raw_*.pth：用于从二阶段最佳 epoch 继续训练。
-- last_resume_raw_*.pth：用于普通断点续训。
-- metrics.json、classification_report.csv、confusion_matrix.csv、predictions.csv、wrong_samples.csv。
-
-运行示例：
-python weather_stage2_official_finetune.py \
-  --experiment S2_E0_convnextv2_tiny_official_ft \
-  --init_checkpoint /root/Image_Classify/output/student_convnextv2_tiny-combined2/best_ema_model_xxx.pth
-
-torchrun --nproc_per_node=6 weather_stage2_official_finetune.py \
-  --experiment S2_E2_swin_base_official_ft \
-  --init_checkpoint /root/Image_Classify/output/teacher_swin_base_combined2/best_ema_model_xxx.pth
-"""
 
 import os
 os.environ.setdefault("NO_ALBUMENTATIONS_UPDATE", "1")
@@ -133,8 +106,8 @@ PARAMS: Dict[str, Any] = {
     # train_dir 必须是 official_train，也就是官方数据 80%。
     # val_dir 必须是 official_val，也就是官方数据 20%。
     # 注意：extra_train 不应该出现在二阶段 train_dir 里。
-    "train_dir": "/root/Image_Classify/data_cleaning/mo_cleaned_train",
-    "val_dir": "/root/Image_Classify/data_cleaning/mo_cleaned_val",
+    "train_dir": "",
+    "val_dir": "",
 
     # 第一阶段 best_ema_model_*.pth。
     # 这个 checkpoint 只作为二阶段初始化，不恢复 optimizer/scheduler。
@@ -160,7 +133,7 @@ PARAMS: Dict[str, Any] = {
     },
 
     # 保存路径
-    "root_save_path": "/root/Image_Classify/output_stage2_official_ft",
+    "root_save_path": "",
 
     # 二阶段公共参数：小学习率、少 epoch、短 patience。
     "epochs": 10,
@@ -230,8 +203,8 @@ EXPERIMENTS: Dict[str, Dict[str, Any]] = {
         "model_family": "convnextv2",
         "pretrained": False,
         "require_pretrained": False,
-        "local_weight_path": "/root/Image_Classify/pretrain/ConvNeXt_V2_model.safetensors",
-        "init_checkpoint": "/root/Image_Classify/output2/student_convnextv2_tiny-combined3/best_ema_model_20260626_171952_ep30_0.9647.pth",  # 建议填第一阶段 E0 的 best_ema_model_*.pth，或命令行传入
+        "local_weight_path": "",
+        "init_checkpoint": "",  # 建议填第一阶段 E0 的 best_ema_model_*.pth，或命令行传入
         "drop_path_rate": 0.15,
         "batch_size": 32,
         "lr": 1e-5,
@@ -246,8 +219,8 @@ EXPERIMENTS: Dict[str, Dict[str, Any]] = {
         "model_family": "convnextv2",
         "pretrained": False,
         "require_pretrained": False,
-        "local_weight_path": "/root/Image_Classify/pretrain/timm_convnextv2_base_fcmae_ft_in22k_in1k(89M).safetensors",
-        "init_checkpoint": "/root/Image_Classify/output2/student_convnextv2_tiny-combined3/best_ema_model_20260626_171952_ep30_0.9647.pth",  # 建议填第一阶段 E1 的 best_ema_model_*.pth，或命令行传入
+        "local_weight_path": "",
+        "init_checkpoint": "",  # 建议填第一阶段 E1 的 best_ema_model_*.pth，或命令行传入
         "drop_path_rate": 0.15,
         "batch_size": 16,
         "lr": 2e-5,
@@ -262,8 +235,8 @@ EXPERIMENTS: Dict[str, Dict[str, Any]] = {
         "model_family": "swin",
         "pretrained": False,
         "require_pretrained": False,
-        "local_weight_path": "/root/Image_Classify/pretrain/swin_base_patch4_window7_224.ms_in22k_ft_in1k.safetensors",
-        "init_checkpoint": "/root/Image_Classify/new_upload_pth-pt_2/best_ema_model_20260626_172957_ep24_0.9755_swin_base-combined3-best.pth",  # 建议填第一阶段 E2 的 best_ema_model_*.pth，或命令行传入
+        "local_weight_path": "",
+        "init_checkpoint": "",  # 建议填第一阶段 E2 的 best_ema_model_*.pth，或命令行传入
         "drop_path_rate": 0.18,
         "batch_size": 16,
         "lr": 1.5e-5,
@@ -278,8 +251,8 @@ EXPERIMENTS: Dict[str, Dict[str, Any]] = {
         "model_family": "eva02",
         "pretrained": False,
         "require_pretrained": False,
-        "local_weight_path": "/root/Image_Classify/pretrain/eva02_base_patch14_224.mim_in22k.safetensors",
-        "init_checkpoint": "/root/Image_Classify/new_upload_pth-pt_2/best_ema_model_20260626_174617_ep20_0.9648_EVA-combined3.pth",  # 建议填第一阶段 E3 的 best_ema_model_*.pth，或命令行传入
+        "local_weight_path": "",
+        "init_checkpoint": "",  # 建议填第一阶段 E3 的 best_ema_model_*.pth，或命令行传入
         "drop_path_rate": 0.10,
         "batch_size": 16,
         "lr": 8e-5,
