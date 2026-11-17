@@ -101,7 +101,7 @@ Stage-2：
 
 第二阶段训练代码：train-stage2.py
 
-模型格式转化代码：main_pt.py
+模型格式转化代码：pack_to_pt.py
 
 评测代码：main_pt_soft_vote.py
 
