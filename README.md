@@ -97,7 +97,9 @@ Stage-2：
 
 ## 该文件的的组织
 
-训练代码：train.py
+第一阶段训练代码：train-stage1.py
+
+第二阶段训练代码：train-stage2.py
 
 模型格式转化代码：main_pt.py
 
